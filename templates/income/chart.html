@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-10">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="">Income Summary</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Summary</li>
+        </ol>
+      </nav> 
+     </div>
+  
+     <div class="col-md-2 ">
+      <a href=" " class="btn btn-primary">Back</a>
+     </div>
+  </div>
+  <div class="container mt-4">
+
+    {% include 'partials/_messages.html' %}
+
+    
+    {% if income.count %}
+
+    <div class="row">
+      <div class="col-md-8"></div>
+      <div class="col-md-4">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" id="searchField">
+        </div>
+      </div>
+    </div>
+      
+    {% endif %}
+  </div>
+
+  <div>
+    <canvas id="source_chart" height="400" width="400"></canvas>
+  </div>
+  
+ 
+
+  </div>
+
+  <script src="{% static 'js/chart.js' %}"></script>
+ 
+{% endblock %}

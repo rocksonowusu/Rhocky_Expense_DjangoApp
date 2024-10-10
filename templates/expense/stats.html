@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+    Expenses and Income Summary
+
+
+{% block content %}
+
+<div class="container mt-4">
+  <div class="row">
+  <div class="container mt-4"> 
+    <h3> Expenses and Income Summary </h3> 
+    {% include 'partials/_messages.html' %}
+
+    
+    {% if expenses.count %}
+
+    <div class="row">
+      <div class="col-md-8"></div>
+      <div class="col-md-4">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" id="searchField">
+        </div>
+      </div>
+    </div>
+      
+    {% endif %}
+  </div>
+
+  
+    <!-- Adjust width and height here -->
+    <canvas id="summaryChart" width="400" height="200"></canvas>
+
+
+</div>
+
+<script>
+  function fetchSummaryData() {
+    console.log('Fetching summary data...'); // Add this line
+    fetch('/expenses-incomes-summary/')
+    .then(response => response.json())
+    .then(data => {
+        // Call function to render chart with fetched data
+        renderChart(data);
+    })
+    .catch(error => console.error('Error fetching summary data:', error));
+}
+
+    // Function to render the chart
+    function renderChart(data) {
+        const ctx = document.getElementById('summaryChart').getContext('2d');
+        const summaryChart = new Chart(ctx, {
+            type: 'line', // Change chart type to line
+            data: {
+                labels: data.months,
+                datasets: [
+                    {
+                        label: 'Expenses',
+                        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1,
+                        data: data.expenses
+                    },
+                    {
+                        label: 'Income',
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        data: data.income
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        maintainAspectRatio: false,
+                    }]
+                }
+            }
+        });
+    }
+
+    // Fetch summary data when the page loads
+    document.addEventListener('DOMContentLoaded', fetchSummaryData);
+</script>
+
+{% endblock %}

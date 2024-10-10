@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+
+
+<div class="container mt-4">
+  
+   <div class="row">
+    <div class="col-md-10" >
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'income' %}">Income</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Edit Income</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="col-md-2" >
+        <a href="{% url 'delete_income' income.id %}" class="btn btn-danger btn-sm form-control">Delete</a>
+    </div>
+   </div>
+
+    <div class="card">
+       <div class="card-body">
+        <h4>Edit Income</h4> 
+        <form action="{% url 'edit_income' income.id %}" method="post">
+        {% include 'partials/_messages.html' %}
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="">Amount</label> 
+          <input type="text" class="form-control form-control-sm" name="amount" value="{{values.amount}}">
+        </div>
+        <br>
+        <div class="form-group">
+          <label for="">Description</label>
+          <input type="text" class="form-control form-control-sm" name="description" value="{{values.description}}">
+        </div>
+        <br>
+        <div class="form-group">
+          <label for="">Sources</label>
+          <select class="form-control" name="source" id="">
+            <option value="{{values.source}}" name="source">{{values.source}}</option>
+
+            {% for source in sources %}
+            <option value="{{source.name}}" name="source">{{source.name}}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <br>
+        <div class="form-group">
+          <label for="">Date</label>
+          <input type="date" class="form-control form-control-sm" value="{{values.date |date:'Y-m-d'}}" name="date">
+        </div>
+        <br>
+        <input type="submit" class="btn btn-primary btn-primary-sm" value="Save">
+      </form>
+      </div>
+    </div>
+</div>
+
+
+{% endblock  %}

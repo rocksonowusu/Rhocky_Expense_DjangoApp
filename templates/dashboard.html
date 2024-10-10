@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% include 'partials/_messages.html' %}
+
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Financial Summary</h1>
+        <a href="{% url 'generate_report' %}" class="d-none d-sm-inline-block btn btn-sm btn-danger shadow-sm"><i
+                class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
+    </div>
+
+    <!-- Content Row -->
+    <div class="row">
+
+        <!-- Total Income Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                               Total Income</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ currency }}{{ total_income_amount }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-bill fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Expenses Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Expenses</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ currency }} {{ total_expense_amount }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-bar fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Income vs Expense Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Income Vs Expense
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ percentage }}%</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amount Balance Card -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Amount Balance
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ currency }}{{ balance }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-balance-scale fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="col-md-12 " style="padding-bottom: 20px;">
+            <div class="card">
+                <div class="card-body d-flex justify-content-center align-items-center">
+                    <canvas id="summaryChart" width="500" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense Categories and Income Sources Tables -->
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-danger mb-3">Expense Categories</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in expense_category %}
+                                    <tr>
+                                        <td>{{ category }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title text-primary mb-3">Income Sources</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for source in income_source %}
+                                    <tr>
+                                        <td>{{ source }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function fetchSummaryData() {
+      console.log('Fetching summary data...'); // Add this line
+      fetch('/expenses-incomes-summary/')
+      .then(response => response.json())
+      .then(data => {
+          // Call function to render chart with fetched data
+          renderChart(data);
+      })
+      .catch(error => console.error('Error fetching summary data:', error));
+  }
+  
+      // Function to render the chart
+      function renderChart(data) {
+          const ctx = document.getElementById('summaryChart').getContext('2d');
+          const summaryChart = new Chart(ctx, {
+              type: 'line', // Change chart type to line
+              data: {
+                  labels: data.months,
+                  datasets: [
+                      {
+                          label: 'Expenses',
+                          backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                          borderColor: 'rgba(255, 99, 132, 1)',
+                          borderWidth: 1,
+                          data: data.expenses
+                      },
+                      {
+                          label: 'Income',
+                          backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                          borderColor: 'rgba(54, 162, 235, 1)',
+                          borderWidth: 1,
+                          data: data.income
+                      }
+                  ]
+              },
+              options: {
+                maintainAspectRatio: false,
+                  scales: {
+                      yAxes: {
+                          ticks: {
+                              beginAtZero: true
+                          },
+                          
+                      }
+                  }
+              }
+          });
+      }
+  
+      // Fetch summary data when the page loads
+      document.addEventListener('DOMContentLoaded', fetchSummaryData);
+</script>
+
+{% endblock %}
